@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Email Type Checker</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        position: relative;
+      }
+
+      h1 {
+        color: #333;
+      }
+
+      form {
+        margin-top: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      button {
+        padding: 10px;
+        font-size: 16px;
+        cursor: pointer;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+      }
+
+      textarea {
+        padding: 8px;
+        font-size: 14px;
+        width: 100%;
+        resize: none;
+        margin-bottom: 10px;
+        outline: none !important;
+      }
+      .result {
+        text-align: center;
+      }
+      .result h3 {
+        margin-bottom: 12px;
+      }
+      .result p {
+        color: red;
+        font-size: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Spam or Email</h1>
+
+    <form action="/process_input" method="post">
+      <p for="userInput">Enter the email:</p>
+      <textarea
+        id="userInput"
+        name="user_input"
+        rows="6"
+        cols="80"
+        required
+      ></textarea>
+      <button type="submit">Find</button>
+    </form>
+
+    {% if result %}
+    <div class="result">
+      {% if result == 'Spam' %}
+      <p>This is a <strong>Spam</strong> email. Be cautious!</p>
+      {% elif result == 'Email' %}
+      <p>This is an ordinary email.</p>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const textarea = document.getElementById("userInput");
+        const resultSection = document.querySelector(".result");
+
+        textarea.addEventListener("input", function () {
+          resultSection.style.display =
+            this.value.trim() === "" ? "none" : "block";
+        });
+      });
+    </script>
+  </body>
+</html>
