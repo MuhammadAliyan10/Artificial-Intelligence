@@ -8,7 +8,6 @@ df = pd.read_csv('./Data/TotalData.csv')
 
 x_train,x_test,y_train,y_test =train_test_split(df.Message,df.Category,test_size=0.2)
 
-
 v = CountVectorizer()
 x_train_count = v.fit_transform(x_train.values)
 
@@ -25,11 +24,6 @@ def email_checker(email):
         return "Email"
     elif result == 'spam':
         return "Spam"
-
-
-
-    
-     
 
 app = Flask(__name__)
 
