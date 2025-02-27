@@ -4,7 +4,6 @@ people = ["Gilderoy", "Pomona", "Minerva", "Horace"]
 houses = ["Gryffindor", "Hufflepuff", "Ravenclaw", "Slytherin"]
 
 symbols = []
-
 knowledge = And()
 
 for person in people:
