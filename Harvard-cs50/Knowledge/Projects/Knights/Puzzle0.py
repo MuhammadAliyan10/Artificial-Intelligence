@@ -1,7 +1,7 @@
 from Logic import *
 
-knight = Symbol('AKnight')
-knave = Symbol('AKnave')
+knight = Symbol("AKnight")
+knave = Symbol("AKnave")
 characters = [knight, knave]
 
 
