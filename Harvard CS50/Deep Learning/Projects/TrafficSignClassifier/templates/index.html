@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Traffic Sign Classifier</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Custom Styles -->
+    <style>
+      .button-hover:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+      }
+      .loading::after {
+        content: " .";
+        animation: dots 1.5s steps(5, end) infinite;
+      }
+      @keyframes dots {
+        0% {
+          content: " .";
+        }
+        25% {
+          content: " ..";
+        }
+        50% {
+          content: " ...";
+        }
+        75% {
+          content: " ..";
+        }
+        100% {
+          content: " .";
+        }
+      }
+    </style>
+  </head>
+  <body class="bg-gray-900 text-white min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="bg-gray-800 p-4 shadow-md">
+      <h1 class="text-2xl font-bold text-center">Traffic Sign Classifier</h1>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow flex flex-col items-center justify-center p-6">
+      <!-- Image Upload Section -->
+      <div class="bg-gray-800 rounded-lg p-6 shadow-lg w-full max-w-md">
+        <form id="upload-form" enctype="multipart/form-data" class="space-y-4">
+          <input
+            type="file"
+            name="image"
+            id="image-input"
+            accept=".png,.jpg,.ppm"
+            class="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-teal-600 file:text-white hover:file:bg-teal-700"
+          />
+          <div class="flex space-x-4">
+            <button
+              type="submit"
+              id="upload-btn"
+              class="w-full bg-teal-600 text-white py-2 rounded-lg font-semibold button-hover transition duration-200"
+            >
+              Upload Image
+            </button>
+            <button
+              type="button"
+              id="predict-btn"
+              class="w-full bg-teal-600 text-white py-2 rounded-lg font-semibold button-hover transition duration-200 hidden"
+            >
+              Predict
+            </button>
+          </div>
+        </form>
+
+        <!-- Image Display -->
+        <div id="image-container" class="mt-4">
+          <img
+            id="uploaded-image"
+            class="w-full h-64 object-contain rounded-lg hidden"
+            alt="Uploaded Image"
+          />
+        </div>
+
+        <!-- Result Display -->
+        <div id="result" class="mt-4 text-center text-gray-300">
+          <p>Upload an image to start</p>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer/Status -->
+    <footer class="bg-gray-800 p-2 text-center text-sm text-gray-400">
+      <p id="status">Ready</p>
+    </footer>
+
+    <!-- JavaScript for Interactivity -->
+    <script>
+      const form = document.getElementById("upload-form");
+      const imageInput = document.getElementById("image-input");
+      const uploadBtn = document.getElementById("upload-btn");
+      const predictBtn = document.getElementById("predict-btn");
+      const imageContainer = document.getElementById("image-container");
+      const uploadedImage = document.getElementById("uploaded-image");
+      const result = document.getElementById("result");
+      const status = document.getElementById("status");
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const file = imageInput.files[0];
+        if (!file) {
+          alert("Please select an image!");
+          return;
+        }
+
+        uploadBtn.disabled = true;
+        uploadBtn.textContent = "Uploading...";
+        status.textContent = "Uploading";
+        result.textContent = "Processing...";
+
+        const formData = new FormData();
+        formData.append("image", file);
+
+        try {
+          const response = await fetch("/", {
+            method: "POST",
+            body: formData,
+          });
+          const data = await response.json();
+
+          if (data.error) {
+            throw new Error(data.error);
+          }
+
+          // Fix: Use the server-provided URL for the image
+          uploadedImage.src = data.image_url + "?" + new Date().getTime(); // Prevent caching
+          uploadedImage.classList.remove("hidden");
+          imageContainer.classList.remove("hidden");
+          result.innerHTML = "Image uploaded. Click Predict to classify.";
+          predictBtn.classList.remove("hidden");
+          uploadBtn.classList.add("hidden");
+          status.textContent = "Image loaded";
+        } catch (error) {
+          result.textContent = "Error: " + error.message;
+          status.textContent = "Upload failed";
+        } finally {
+          uploadBtn.disabled = false;
+          uploadBtn.textContent = "Upload Image";
+        }
+      });
+
+      predictBtn.addEventListener("click", async () => {
+        predictBtn.disabled = true;
+        predictBtn.textContent = "Predicting";
+        result.textContent = "Predicting";
+        result.classList.add("loading");
+        status.textContent = "Processing";
+
+        try {
+          const file = imageInput.files[0];
+          const formData = new FormData();
+          formData.append("image", file);
+
+          const response = await fetch("/", {
+            method: "POST",
+            body: formData,
+          });
+          const data = await response.json();
+
+          if (data.error) {
+            throw new Error(data.error);
+          }
+
+          result.innerHTML = `<span class="text-teal-400">${data.prediction}</span><br>Confidence: ${data.confidence}%`;
+          status.textContent = "Prediction complete";
+        } catch (error) {
+          result.textContent = "Error: " + error.message;
+          status.textContent = "Prediction failed";
+        } finally {
+          predictBtn.disabled = false;
+          predictBtn.textContent = "Predict";
+          result.classList.remove("loading");
+        }
+      });
+    </script>
+  </body>
+</html>
